@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,16 +11,35 @@ namespace Day2
     class Program
     {
         private const string InputFileName = "input.txt";
+        private const int TargetOutput = 19690720;
 
         static async Task Main(string[] args)
         {
-            var program = new IntCodeProgram(await ReadProgramAsync());
-            //var program = new IntCodeProgram(new List<int>{ 1, 9, 10, 3, 2, 3, 11, 0, 99, 30, 40, 50 });
+            var tape = await ReadProgramAsync();
+            for (var noun = 0; noun <= 99; ++noun)
+            {
+                for (var verb = 0; verb <= 99; ++verb)
+                {
+                    if (Run(tape, noun, verb) == TargetOutput)
+                    {
+                        var value = 100 * noun + verb;
+                        Console.WriteLine($"The value is {value}");
+                    }
+                }
+            }
+        }
+
+        public static int Run(IEnumerable<int> tape, int noun, int verb)
+        {
+            var program = new IntCodeProgram(tape);
+            program[1] = noun;
+            program[2] = verb;
             while (!program.Finished)
             {
                 program.Process();
             }
-            Console.WriteLine(program);
+
+            return program[0];
         }
 
         static async Task<List<int>> ReadProgramAsync()
@@ -37,9 +57,15 @@ namespace Day2
 
         public bool Finished { get; private set; } = false;
 
-        public IntCodeProgram(List<int> tape)
+        public IntCodeProgram(IEnumerable<int> tape)
         {
-            _tape = tape;
+            _tape = new List<int>(tape);
+        }
+
+        public int this[int idx]
+        {
+            get => _tape[idx];
+            set => _tape[idx] = value;
         }
 
         public void Process()
