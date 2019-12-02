@@ -25,7 +25,14 @@ namespace AdventOfCode.Day1.Puzzle1
             var val = mass / 3.0D;
             val = Math.Floor(val);
             val -= 2;
-            return (int) val;
+            var fuel = (int) val;
+
+            if (fuel < 0)
+            {
+                return 0;
+            }
+
+            return fuel + GetRequiredFuel(fuel);
         }
 
         public static async Task<List<int>> ReadInputAsync()
